@@ -115,17 +115,19 @@ def samples(genres):
 	]
 
 
-	# Filter the data based on the sample number and
-	# only keep rows with values above 1
-	sample_data = allBechdelRatings = db.session.query(*sel).all()
-	# Sort the data
-	#sorted_sample_data = sample_data.sort_values(by=[sample, "id", "label"], ascending=False)
-	# Format the data to send as json
-	#data = {
-		#"otu_ids": sorted_sample_data.id.values.tolist(),
-		#"sample_values": sorted_sample_data[sample].values.tolist(),
-		#"otu_labels": sorted_sample_data.label.tolist(),
-	#}
+	# Filter the data based on the genre
+	sample_data = db.session.query(*sel).filter(Samples_Metadata.genres == genres).all()
+
+	data = {}
+	for result in sample_data:
+		data["genres"] = sample_data[0]
+		data["imdbid"] = sample_data[1]
+		data["title"] = sample_data[2]
+		data["year"] = sample_data[3]
+		data["gross"] = sample_data[4]
+		data["bechdelRating"] = sample_data[5]
+
+	print(sample_data)
 	return jsonify(sample_data)
 
 
