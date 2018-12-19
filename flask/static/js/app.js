@@ -25,40 +25,73 @@ function buildMetadata(genres) {
 });
 }
 
-function buildCharts(genres) {
+function buildCharts(ratings) {
 
 	// @TODO: Use `d3.json` to fetch the sample data for the plots
-	var url = `/samples/${genres}`;
+	var url = `/ratings`;
 
 	d3.json(url).then(function(response) {
 	
-		var title = response[2];
-		var year = response[3];
-		var gross = response[4];
-		var rating = response[5];
+		console.log(response);
+		var titles = [];
+		var years = [];
+		var grosses = [];
+		var ratings = [];
+		var size = [];
+		var c = [];
 		
-		console.log(title);
-		console.log(year);
-		console.log(gross);
-		console.log(rating);
+		for (var i = 0; i < response.length; i++) {
+			var title = response[i]["title"];
+			var year = response[i]["year"];
+			var gross = response[i]["gross"];
+			var rating = response[i]["rating"];
 		
+			titles.push(title);
+			years.push(year);
+			grosses.push(gross);
+			ratings.push(rating);
+			size.push(gross/10000000);
+			
+			if (rating == 0) {
+				c.push("red");
+			} else if (rating == "") {
+				c.push("red");
+			} else if (rating == 1) {
+				c.push("orange");
+			} else if (rating == 2) {
+				c.push("yellow");
+			} else {
+				c.push("green");
+			}
+			
+			//console.log(c);
+			//console.log(title);
+			//console.log(year);
+			//console.log(gross);
+			//console.log(rating);
+		}
+		//console.log(ratings);
+		//console.log(c);
+
 		
 		// @TODO: Build a Bubble Chart using the sample data
 		var trace1 = {
-			x: year,
-			y: gross,
+			x: years,
+			y: grosses,
 			mode: "markers",
 			marker: {
-				size: 10,
-				color: rating
+				size: size,
+				color: c
 			},
-			text: title,
+			text: titles,
 			textinfo: "none",
-			hoverinfo: "x+y",
+			hoverinfo: "y+text+ratings",
 			type: "scatter"
 		};
+	
+		var data = [trace1];
 		
-		var data = [trace1];	
+		console.log(trace1);
 		
 		var layout = {
 			showlegend: false,
@@ -67,15 +100,16 @@ function buildCharts(genres) {
 			xaxis: {title: "Release Year"},
 			yaxis: {title: "Gross"}
 		};
-		
+
 		Plotly.newPlot("bubble", data, layout);
+
 		
 		// @TODO: Build a Pie Chart
 		// HINT: You will need to use slice() to grab the top 10 sample_values,
 		// otu_ids, and labels (10 each).
 		var trace2 = {
-			values: rating,
-			labels: title,
+			values: ratings,
+			labels: titles,
 			text: gross,
 			textinfo: "percent",
 			hoverinfo: "label+text+value+percent",
@@ -84,7 +118,7 @@ function buildCharts(genres) {
 		
 		var topTen = [trace2];
 
-		Plotly.newPlot("pie", topTen);
+		//Plotly.newPlot("pie", topTen);
 	});
 }
 
