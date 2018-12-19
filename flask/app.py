@@ -33,6 +33,13 @@ Samples = Base.classes.movies_id
 #Bechdel = Base.classes.current_bechdel
 Genres = Base.classes.genres_clean
 
+#Imported
+top10_18 = Base.classes.eighteen
+top10_17 = Base.classes.seventeen
+SW = Base.classes.sw
+JKR = Base.classes.jkr
+MCU = Base.classes.mcu
+
 
 @app.route("/")
 def index():
@@ -53,6 +60,7 @@ def ratings():
 		Samples_Metadata.movie_title,
 		Samples_Metadata.title_year,
 		Samples_Metadata.bechdelRating,
+		Samples_Metadata.gross
 	]
 
 	bechdelBubbles = db.session.query(*sel).all()
@@ -90,42 +98,30 @@ def bechdel(genres):
 	
 	sel = [
 		Samples_Metadata.genres,
-		Samples_Metadata.id,
+		Samples_Metadata.gross,
 		Samples_Metadata.movie_title,
 		Samples_Metadata.title_year,
 		Samples_Metadata.bechdelRating,
 	]
 	
 	#allBechdelRatings = db.session.query(*sel).all()
-	
-	results = db.session.query(*sel).filter(Samples_Metadata.genres == genres).all()
+	if genres == "All":
+		rating_metadata = db.session.query(*sel).all()
+	else:
+		rating_metadata = db.session.query(*sel).filter(Samples_Metadata.genres == genres).all()
 	
 	# Create a dictionary entry for each row of metadata information
-	sample_metadata = {}
-	for result in results:
-		sample_metadata["genres"] = result[0]
-		sample_metadata["imdbid"] = result[1]
-		sample_metadata["title"] = result[2]
-		sample_metadata["year"] = result[3]
-		sample_metadata["bechdelRating"] = result[4]
-
-	#bechdata = {
-		#"imdbid": allBechdelRatingsPie.values.tolist(),
-		#"title": allBechdelRatingsPie.title.values.tolist(),
-		#"year": allBechdelRatingsPie.year.tolist(),
-		#"bechdelRating": allBechdelRatingsPie.bechdelRating.tolist(),
-	#}
-
-	# Return a list of the column names (sample names)
-	#print(sample_metadata)
-	#return jsonify(bechdata)
-	return jsonify(sample_metadata)
+	genrearray = []
+	for metadata in rating_metadata:
+		rating_data = {}
+		rating_data["genre"] = metadata[0]
+		rating_data["gross"] = metadata[1]
+		rating_data["title"] = metadata[2]
+		rating_data["year"] = metadata[3]
+		rating_data["rating"] = metadata[4]	
+		genrearray.append(rating_data)
 	
-	#data = {
-	#	"bechdelRating": allBechdelRatingsPie.bechdelRating.values.tolist()
-	#}
-	#return jsonify(allBechdelRatingsPie)
-
+	return jsonify(genrearray)
 
 @app.route("/samples/<genres>")
 def samples(genres):
@@ -158,6 +154,128 @@ def samples(genres):
 		
 	#print(data)
 	return jsonify(sample_data)
+
+#Youqing's routes
+@app.route("/top18")
+def top18():
+
+    sel = [top10_18.source,top10_18.target,top10_18.value]
+    results = db.session.query(*sel).all()
+    node=[]
+    link=[]
+    for result in results:
+        node.append({"name":result[0]})
+        node.append({"name":result[1]})
+        link.append({"source":result[0],"target":result[1],"value":result[2]})
+    nodes = []
+    for dic in node:
+        if dic not in nodes:
+            nodes.append(dic)
+    links = []
+    for dic in link:
+        dic["source"] = nodes.index({"name":dic["source"]})
+        dic["target"] = nodes.index({"name":dic["target"]})
+        links.append(dic)
+    graph = {"nodes":nodes,"links":links}
+    # Return a list of the column names (sample names)
+    return jsonify(graph)
+
+@app.route("/top17")
+def top17():
+
+    sel = [top10_17.source,top10_17.target,top10_17.value]
+    results = db.session.query(*sel).all()
+    node=[]
+    link=[]
+    for result in results:
+        node.append({"name":result[0]})
+        node.append({"name":result[1]})
+        link.append({"source":result[0],"target":result[1],"value":result[2]})
+    nodes = []
+    for dic in node:
+        if dic not in nodes:
+            nodes.append(dic)
+    links = []
+    for dic in link:
+        dic["source"] = nodes.index({"name":dic["source"]})
+        dic["target"] = nodes.index({"name":dic["target"]})
+        links.append(dic)
+    graph = {"nodes":nodes,"links":links}
+    # Return a list of the column names (sample names)
+    return jsonify(graph)
+
+@app.route("/sw")
+def sw():
+
+    sel = [SW.source,SW.target,SW.value]
+    results = db.session.query(*sel).all()
+    node=[]
+    link=[]
+    for result in results:
+        node.append({"name":result[0]})
+        node.append({"name":result[1]})
+        link.append({"source":result[0],"target":result[1],"value":result[2]})
+    nodes = []
+    for dic in node:
+        if dic not in nodes:
+            nodes.append(dic)
+    links = []
+    for dic in link:
+        dic["source"] = nodes.index({"name":dic["source"]})
+        dic["target"] = nodes.index({"name":dic["target"]})
+        links.append(dic)
+    graph = {"nodes":nodes,"links":links}
+    # Return a list of the column names (sample names)
+    return jsonify(graph)
+
+@app.route("/jkr")
+def jkr():
+
+    sel = [JKR.source,JKR.target,JKR.value]
+    results = db.session.query(*sel).all()
+    node=[]
+    link=[]
+    for result in results:
+        node.append({"name":result[0]})
+        node.append({"name":result[1]})
+        link.append({"source":result[0],"target":result[1],"value":result[2]})
+    nodes = []
+    for dic in node:
+        if dic not in nodes:
+            nodes.append(dic)
+    links = []
+    for dic in link:
+        dic["source"] = nodes.index({"name":dic["source"]})
+        dic["target"] = nodes.index({"name":dic["target"]})
+        links.append(dic)
+    graph = {"nodes":nodes,"links":links}
+    # Return a list of the column names (sample names)
+    return jsonify(graph)
+
+@app.route("/mcu")
+def mcu():
+
+    sel = [MCU.source,MCU.target,MCU.value]
+    results = db.session.query(*sel).all()
+    node=[]
+    link=[]
+    for result in results:
+        node.append({"name":result[0]})
+        node.append({"name":result[1]})
+        link.append({"source":result[0],"target":result[1],"value":result[2]})
+    nodes = []
+    for dic in node:
+        if dic not in nodes:
+            nodes.append(dic)
+    links = []
+    for dic in link:
+        dic["source"] = nodes.index({"name":dic["source"]})
+        dic["target"] = nodes.index({"name":dic["target"]})
+        links.append(dic)
+    graph = {"nodes":nodes,"links":links}
+    # Return a list of the column names (sample names)
+    return jsonify(graph)
+
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-function buildMetadata(genres) {
+/*function buildMetadata(genres) {
 
 	// @TODO: Complete the following function that builds the metadata panel
 	
@@ -20,19 +20,17 @@ function buildMetadata(genres) {
 			p.text(`${key}: ${value}`);
 		});
 
-		// BONUS: Build the Gauge Chart
-		// buildGauge(data.WFREQ);	
 });
-}
+}*/
 
-function buildCharts(ratings) {
+function buildCharts(genres) {
 
 	// @TODO: Use `d3.json` to fetch the sample data for the plots
-	var url = `/ratings`;
+	var url = `/bechdel/${genres}`;
 
 	d3.json(url).then(function(response) {
 	
-		console.log(response);
+		//console.log(response);
 		var titles = [];
 		var years = [];
 		var grosses = [];
@@ -91,7 +89,7 @@ function buildCharts(ratings) {
 	
 		var data = [trace1];
 		
-		console.log(trace1);
+		//console.log(trace1);
 		
 		var layout = {
 			showlegend: false,
@@ -102,23 +100,6 @@ function buildCharts(ratings) {
 		};
 
 		Plotly.newPlot("bubble", data, layout);
-
-		
-		// @TODO: Build a Pie Chart
-		// HINT: You will need to use slice() to grab the top 10 sample_values,
-		// otu_ids, and labels (10 each).
-		var trace2 = {
-			values: ratings,
-			labels: titles,
-			text: gross,
-			textinfo: "percent",
-			hoverinfo: "label+text+value+percent",
-			type: "pie"
-		};
-		
-		var topTen = [trace2];
-
-		//Plotly.newPlot("pie", topTen);
 	});
 }
 
@@ -138,14 +119,14 @@ function init() {
 		// Use the first sample from the list to build the initial plots
 		const firstSample = sampleNames[0];
 		buildCharts(firstSample);
-		buildMetadata(firstSample);
+		//buildMetadata(firstSample);
 	});
 }
 
 function optionChanged(newSample) {
 	// Fetch new data each time a new sample is selected
 	buildCharts(newSample);
-	buildMetadata(newSample);
+	//buildMetadata(newSample);
 }
 
 // Initialize the dashboard
