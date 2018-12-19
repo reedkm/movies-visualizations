@@ -19,7 +19,7 @@ app = Flask(__name__)
 # Database Setup
 #################################################
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/moviesBechdel.sqlite"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/movies.sqlite"
 db = SQLAlchemy(app)
 
 # reflect an existing database into a new model
@@ -29,8 +29,6 @@ Base.prepare(db.engine, reflect=True)
 
 # Save references to each table
 Samples_Metadata = Base.classes.movies_data
-Samples = Base.classes.movies_id
-#Bechdel = Base.classes.current_bechdel
 Genres = Base.classes.genres_clean
 
 #Imported
@@ -122,38 +120,6 @@ def bechdel(genres):
 		genrearray.append(rating_data)
 	
 	return jsonify(genrearray)
-
-@app.route("/samples/<genres>")
-def samples(genres):
-	"""Return `otu_ids`, `otu_labels`,and `sample_values`."""
-	stmt = db.session.query(Samples_Metadata).statement
-	df = pd.read_sql_query(stmt, db.session.bind)
-
-	sel = [
-		Samples_Metadata.genres,
-		Samples_Metadata.id,
-		Samples_Metadata.movie_title,
-		Samples_Metadata.title_year,
-		Samples_Metadata.gross,
-		Samples_Metadata.bechdelRating,
-	]
-
-
-	# Filter the data based on the genre
-	sample_data = db.session.query(*sel).filter(Samples_Metadata.genres == genres).all()
-
-	
-	data = {}
-	for result in sample_data[1]:
-		data["genres"] = sample_data[0]
-		data["imdbid"] = sample_data[1]
-		data["title"] = sample_data[2]
-		data["year"] = sample_data[3]
-		data["gross"] = sample_data[4]
-		data["bechdelRating"] = sample_data[5]
-		
-	#print(data)
-	return jsonify(sample_data)
 
 #Youqing's routes
 @app.route("/top18")

@@ -1,27 +1,104 @@
-/*function buildMetadata(genres) {
+var symbol = "$";
 
-	// @TODO: Complete the following function that builds the metadata panel
-	
-	var url = `/bechdel/${genres}`;
-	
-	// Use `d3.json` to fetch the metadata for a sample
-	d3.json(url).then(function(response) {
-		// Use d3 to select the panel with id of `#sample-metadata`
-		var sampleMetadata = d3.select("#movie-metadata");
-		// Use `.html("") to clear any existing metadata
-		sampleMetadata.html("");
-		// Use `Object.entries` to add each key and value pair to the panel
-		// Hint: Inside the loop, you will need to use d3 to append new
-		// tags for each key-value in the metadata.
-		Object.entries(response).forEach(([key, value]) => {
-		// Log the key and value
-		// console.log(`Key: ${key} and Value ${value}`);
-			var p = sampleMetadata.append("p");
-			p.text(`${key}: ${value}`);
-		});
+var margin = {top: 20, right: 20, bottom: 20, left: 20},
+	width = 1150 - margin.left - margin.right,
+	height = 400 - margin.top - margin.bottom;
 
+var formatNumber = d3.format(",.0f"),	 // zero decimal places
+	format = function(d) { return symbol + " " + formatNumber(d); },
+	color = d3.scaleOrdinal(d3.schemeCategory10)
+
+// append the svg canvas to the page
+var svg = d3.select("#chart").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", 
+		"translate(" + margin.left + "," + margin.top + ")");
+
+// Set the sankey diagram properties
+var sankey = d3.sankey()
+	.nodeWidth(15)
+	.nodePadding(10)
+	.size([width, height])
+
+var path = sankey.link();
+
+var graph
+// load the data (using the timelyportfolio csv method)
+d3.json("/top18").then(function(graph) {
+	sankey
+	.nodes(graph.nodes)
+	.links(graph.links)
+	.layout(32);
+
+// add in the links
+var link = svg.append("g").selectAll(".link")
+	.data(graph.links)
+	.enter().append("path")
+	.attr("class", "link")
+	.attr("d", path)
+	.style("stroke-width", function(d) { return Math.max(1, d.dy); })
+	.sort(function(a, b) { return b.dy - a.dy; });
+
+// add the link titles
+link.append("title")
+		.text(function(d) {
+			return d.source.name + " → " + 
+				d.target.name + "\n" + format(d.value); });
+
+// add in the nodes
+var node = svg.append("g").selectAll(".node")
+	.data(graph.nodes)
+	.enter().append("g")
+	.attr("class", "node")
+	.attr("transform", function(d) { 
+	return "translate(" + d.x + "," + d.y + ")"; })
+	.call(d3.drag()
+	.subject(function(d) { return d; })
+	.on("start", function() { 
+		this.parentNode.appendChild(this); })
+	.on("drag", dragmove));
+
+// add the rectangles for the nodes
+node.append("rect")
+	.attr("height", function(d) { return d.dy; })
+	.attr("width", sankey.nodeWidth())
+	.style("fill", function(d) { 
+		return d.color = color(d.name.replace(/ .*/, "")); })
+	.style("stroke", function(d) { 
+		return d3.rgb(d.color).darker(2); })
+	.append("title")
+	.text(function(d) { 
+		return d.name + "\n" + format(d.value); });
+
+// add in the title for the nodes
+node.append("text")
+	.attr("x", -6)
+	.attr("y", function(d) { return d.dy / 2; })
+	.attr("dy", ".35em")
+	.attr("text-anchor", "end")
+	.attr("transform", null)
+	.text(function(d) { return d.name; })
+	.filter(function(d) { return d.x < width/4; })
+	.attr("x", 6 + sankey.nodeWidth())
+	.attr("text-anchor", "start");
+
+svg.selectAll(".link")
+	.style('stroke', function(d){
+		return d.source.color;
+	})
+
+// the function for moving the nodes
+function dragmove(d) {
+	d3.select(this).attr("transform", 
+		"translate(" + d.x + "," + (
+				d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
+			) + ")");
+	sankey.relayout();
+	link.attr("d", path);
+}
 });
-}*/
 
 function buildCharts(genres) {
 
@@ -51,15 +128,15 @@ function buildCharts(genres) {
 			size.push(gross/10000000);
 			
 			if (rating == 0) {
-				c.push("red");
+				c.push("#d96459");
 			} else if (rating == "") {
-				c.push("red");
+				c.push("#d96459");
 			} else if (rating == 1) {
-				c.push("orange");
+				c.push("#f2ae72");
 			} else if (rating == 2) {
-				c.push("yellow");
+				c.push("#f2e394");
 			} else {
-				c.push("green");
+				c.push("#588c7e");
 			}
 			
 			//console.log(c);
