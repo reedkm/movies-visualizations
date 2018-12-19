@@ -8,6 +8,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
+
 from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
@@ -39,6 +40,33 @@ def index():
 	return render_template("index.html")
 	
 
+@app.route("/ratings")
+def ratings():
+	"""Return a list of ratings."""
+
+	# Use Pandas to perform the sql query
+	stmt = db.session.query(Samples_Metadata).statement
+	df = pd.read_sql_query(stmt, db.session.bind)
+	
+	sel = [
+		Samples_Metadata.gross,
+		Samples_Metadata.movie_title,
+		Samples_Metadata.title_year,
+		Samples_Metadata.bechdelRating,
+	]
+
+	bechdelBubbles = db.session.query(*sel).all()
+	
+	bechdelarray = []
+	for bechdelBubble in bechdelBubbles:
+		rating_metadata = {}
+		rating_metadata["gross"] = bechdelBubble[0]
+		rating_metadata["title"] = bechdelBubble[1]
+		rating_metadata["year"] = bechdelBubble[2]
+		rating_metadata["rating"] = bechdelBubble[3]	
+		bechdelarray.append(rating_metadata)
+	
+	return jsonify(bechdelarray)
 
 @app.route("/genres")
 def genres():
@@ -48,7 +76,7 @@ def genres():
 	stmt = db.session.query(Genres).statement.distinct()
 	genres = pd.read_sql_query(stmt, db.session.bind)
 	
-	print(genres)
+	#print(genres)
 	
 	return jsonify(list(genres.genres))
 	
@@ -89,7 +117,7 @@ def bechdel(genres):
 	#}
 
 	# Return a list of the column names (sample names)
-	print(sample_metadata)
+	#print(sample_metadata)
 	#return jsonify(bechdata)
 	return jsonify(sample_metadata)
 	
@@ -118,16 +146,17 @@ def samples(genres):
 	# Filter the data based on the genre
 	sample_data = db.session.query(*sel).filter(Samples_Metadata.genres == genres).all()
 
+	
 	data = {}
-	for result in sample_data:
+	for result in sample_data[1]:
 		data["genres"] = sample_data[0]
 		data["imdbid"] = sample_data[1]
 		data["title"] = sample_data[2]
 		data["year"] = sample_data[3]
 		data["gross"] = sample_data[4]
 		data["bechdelRating"] = sample_data[5]
-
-	print(sample_data)
+		
+	#print(data)
 	return jsonify(sample_data)
 
 
