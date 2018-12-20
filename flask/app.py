@@ -38,12 +38,14 @@ SW = Base.classes.sw
 JKR = Base.classes.jkr
 MCU = Base.classes.mcu
 
+#imported
+#Weekly = Base.classes.wkly_mov_gross_2018
+
 
 @app.route("/")
 def index():
 	"""Return the homepage."""
 	return render_template("index.html")
-	
 
 @app.route("/ratings")
 def ratings():
